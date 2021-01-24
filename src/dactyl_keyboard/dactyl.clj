@@ -23,7 +23,7 @@
 (def column-style
   (if (> nrows 5) :orthographic :standard))  ; options include :standard, :orthographic, and :fixed
 ; (def column-style :fixed)
-(def pinky-15u true)
+(def pinky-15u false)
 
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 -4.5]
@@ -651,10 +651,10 @@
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
   (union (screw-insert 0 0         bottom-radius top-radius height [11 10 0])
          (screw-insert 0 lastrow   bottom-radius top-radius height [0 0 0])
-        ;  (screw-insert lastcol lastrow  bottom-radius top-radius height [-5 13 0])
-        ;  (screw-insert lastcol 0         bottom-radius top-radius height [-3 6 0])
-         (screw-insert lastcol lastrow  bottom-radius top-radius height [0 12 0])
-         (screw-insert lastcol 0         bottom-radius top-radius height [0 7 0])
+         (screw-insert lastcol lastrow  bottom-radius top-radius height [-5 13 0])
+         (screw-insert lastcol 0         bottom-radius top-radius height [-3 6 0])
+         ;; (screw-insert lastcol lastrow  bottom-radius top-radius height [0 12 0])
+         ;; (screw-insert lastcol 0         bottom-radius top-radius height [0 7 0])
          (screw-insert 1 lastrow         bottom-radius top-radius height [0 -16 0])))
 
 ; Hole Depth Y: 4.4
@@ -736,14 +736,28 @@
 
         (translate [0 0 -20] (cube 350 350 40)))))
 
+;; haven't managed to hull inners on this model,
+;; should be edited on dxf editor to make it hull
 (spit "things/right-plate.scad"
       (write-scad
        (cut
         (translate [0 0 -0.1]
                    (difference (union case-walls
-                                      pinky-walls
-                                      screw-insert-outers)
+                                      screw-insert-outers
+                                      pinky-walls)
                                (translate [0 0 -10] screw-insert-screw-holes))))))
+
+
+(spit "things/right-height-extend.scad"
+      (write-scad
+       (extrude-linear {:height 6}
+                       (translate [0 0 1]
+                                  (mirror [-1 0 0]
+                                          (cut
+                                           (difference (union case-walls
+                                                              pinky-walls
+                                                              screw-insert-outers)
+                                                       (translate [0 0 -10] screw-insert-screw-holes))))))))
 
 (spit "things/test.scad"
       (write-scad
